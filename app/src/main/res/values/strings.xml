@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Sonar Demutator</string>
+    <string name="vc_title">Volume Control</string>
+    <string name="trigger">Trigger</string>
+    <string name="set_vol">Set Volume</string>
+    <string name="set_mic">Set Mic</string>
+    <string name="status_title">Status</string>
+    <string name="vol_level">Volume Level</string>
+    <string name="bg_noise">Background Noise</string>
+    <string name="recorder_db">Mic DB</string>
+    <string name="mic_disp">MIC Reading</string>
+    <string name="action_settings">Action Settings</string>
+    <string name ="first_fragment_label"> First Fragment Label </string>
+    <string name ="second_fragment_label"> Second Fragment Label </string>
+</resources>
