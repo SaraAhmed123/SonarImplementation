@@ -176,9 +176,8 @@ public class Sonar extends AppCompatActivity {
                 int reading = intent.getIntExtra(SonarService.CURRENT_MIC_PROGRESS, 0);
                 currentMic.setProgress(reading);
                 double dbReading = intent.getDoubleExtra(SonarService.CURRENT_MIC_DB_PROGRESS, 0.0);
-                ;
                 //dbReading = 20 * Math.log10(dbReading / MIC_AMPL_HIGH);
-                dbReading = Math.round(dbReading * 100.0) / 100.0;
+               // dbReading = Math.round(dbReading * 100.0) / 100.0;
                 micReading.setText(Double.toString(dbReading));
                 int volume = intent.getIntExtra(SonarService.CURRENT_VOLUME_PROGRESS, 0);
                 currentVolume.setProgress(volume);
@@ -266,7 +265,7 @@ public class Sonar extends AppCompatActivity {
                     / (sampleRate / freqOfTone));
         }
         // convert to 16 bit pcm sound array
-        // assumes the sample buffer is normalised.
+        // buffer
         int idx = 0;
         for (final double dVal : sample) {
             // scale to maximum amplitude

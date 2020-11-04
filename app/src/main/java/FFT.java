@@ -1,6 +1,6 @@
 package com.example.sonarimplementation;
 
-public class FFT {
+public  class FFT {
 
     int n, m;
 
@@ -10,7 +10,7 @@ public class FFT {
 
     double[] window;
 
-    public FFT(int n) {
+    public  FFT(int n) {
         this.n = n;
         this.m = (int) (Math.log(n) / Math.log(2));
 
@@ -65,9 +65,9 @@ public class FFT {
      * 00105   *   as long as this header is included.
      * 00106   ***************************************************************
      */
-    public void fft(double[] x, double[] y) {
-        int i, j, k, n1, n2, a;
-        double c, s, e, t1, t2;
+    public   void fft(double[] x, double[] y) {
+        int  i, j, k, n1, n2, a;
+        double  c, s, e, t1, t2;
 
 
         // Bit-reverse

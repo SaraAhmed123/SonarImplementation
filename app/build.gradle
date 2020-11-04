@@ -56,6 +56,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.3'
     testImplementation 'junit:junit:4.12'
-    implementation 'com.github.wendykierp:JTransforms:3.1'
+    implementation files('libs/JTransforms-3.1-with-dependencies.jar')
+    implementation files('libs/TarsosDSP-Android-latest.jar')
 
 }

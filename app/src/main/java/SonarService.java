@@ -31,7 +31,9 @@ public class SonarService extends Service {
     private static boolean isBackgroundUI = false;
     private final double MIC_FILTER = 0.6;
     private final int MIC_AMPL_HIGH = 32767;
+    static double[] drawingBufferForPlayer = new double[100];
     private final int MIC_AMPL_LOW = 0;
+    int counterPlayer = 0;
     private Intent progressIntent;
 
     AudioManager audioManager = null;
@@ -90,10 +92,17 @@ public class SonarService extends Service {
             return 0;
 
     }
-    public double getAmplitudeEMA() {
-        double amplitude =  getAmplitude();
-        predictedVolume = MIC_FILTER * amplitude + (1.0 - MIC_FILTER) * predictedVolume;
-        return predictedVolume;
+    public double getAmplitudeEMA(byte [] generatedSnd) {
+        double amplitude = getAmplitude () ;
+        double amplitudeDb;
+        for (int i = 0; i < generatedSnd.length/2; i++) {
+            //double y = (generatedSnd[i*2] | generatedSnd[i*2+1] << 8) / 32768.0;
+            // depending on your endianness:
+             double y = (generatedSnd[i*2]<<8 | generatedSnd[i*2+1]) / 32768.0;
+            amplitude += Math.abs(y);
+        }
+      return amplitude = amplitude / generatedSnd.length / 2;
+      // amplitudeDb = 20 * Math.log10((double)Math.abs(amplitude));
     }
 
     @Override
@@ -105,7 +114,7 @@ public class SonarService extends Service {
             @Override
             public void run() {
                 while (updateCurrentVolume) {
-                    Double reading = getAmplitudeEMA();
+                    Double reading = getAmplitudeEMA(Sonar.generatedSnd);
                     int micReading = (int)Math.round(reading);
                     int volume = (int)Math.round(Math.abs((reading/(MIC_AMPL_HIGH - MIC_AMPL_LOW))*(VOLUME_HIGH - VOLUME_LOW)));
                     if (volume < VOLUME_LOW) {
@@ -154,4 +163,3 @@ public class SonarService extends Service {
         mediaRecorder = null;
     }
 }
-
