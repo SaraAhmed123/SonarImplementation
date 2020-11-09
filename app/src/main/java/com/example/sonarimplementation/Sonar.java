@@ -1,4 +1,5 @@
 package com.example.sonarimplementation;
+
 import android.app.ActivityManager;
 //import android.support.annotation;
 import android.content.BroadcastReceiver;
@@ -29,6 +30,8 @@ import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 import java.text.DecimalFormat;
+//package javax.sound.sampled;
+
 //import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
 public class Sonar extends AppCompatActivity {
     private static final int PERMISSION_CODE = 200;
@@ -49,13 +52,21 @@ public class Sonar extends AppCompatActivity {
     AudioManager audioManager;
     ActivityManager activityManager;
     TextView micReading;
-    static final int duration = 10; // seconds
+    static final int duration = 2; // seconds
+    static final float amplitude = 1;
     static final int sampleRate = 44100; // Hz
     static final int numSamples = duration * sampleRate;
     static final double sample[] = new double[numSamples];
-    static final double freqOfTone = 19000; // Hz
+    static final float freqOfTone = 20000; // Hz
     static final byte generatedSnd[] = new byte[2 * numSamples];
     short[] re2 = new short[2048];
+   static final float f1 = 6 * freqOfTone;
+   static final float amplitude1 = 1;
+   static final float twoPiF1 = 2 *(float) Math.PI * f1;
+   static final  float twoPiF = 2 * (float)Math.PI * freqOfTone;
+    static final float[] buffer = new float[(int) (duration * sampleRate)];
+    static final byte[] byteBuffer = new byte[buffer.length * 2];
+ //   static final double time = sample / sampleRate;
     //DoubleFFT_1D fft2 = new DoubleFFT_1D(2048);
     Handler handler = new Handler();
 
@@ -215,6 +226,7 @@ public class Sonar extends AppCompatActivity {
             context.registerReceiver(MICReceiver, intentFilter);
             startService(new Intent(this, SonarService.class));
             genTone();
+            playSound();
 
         } else {
             throw new RuntimeException("Unable to start Sonar Demutator");
@@ -250,7 +262,7 @@ public class Sonar extends AppCompatActivity {
         final Thread thread = new Thread(new Runnable() {
             public void run() {
                 genTone();
-                playSound();
+              playSound();
 
             }
         });
@@ -260,28 +272,38 @@ public class Sonar extends AppCompatActivity {
     }
 
     public static void genTone() {
+
         for (int i = 0; i < numSamples; ++i) {
-            sample[i] = Math.sin(2 * Math.PI * i
-                    / (sampleRate / freqOfTone));
+            //amplitude = SonarService.getAmplitude();
+            sample[i] = Math.sin(2 * Math.PI * i / (sampleRate / freqOfTone));
+            double time = sample[i] / sampleRate;
+            buffer[i] = (float) amplitude * (float) Math.sin(twoPiF * time);
         }
+
         // convert to 16 bit pcm sound array
-        // buffer
-        int idx = 0;
-        for (final double dVal : sample) {
-            // scale to maximum amplitude
-            final short val = (short) ((dVal * 32767));
-            // in 16 bit wav PCM, first byte is the low order byte
-            generatedSnd[idx++] = (byte) (val & 0x00ff);
-            generatedSnd[idx++] = (byte) ((val & 0xff00) >>> 8);
+
+        for (int sample = 0; sample < buffer.length; sample++) {
+            double time = sample / sampleRate;
+            double f0Component = amplitude * Math.sin(twoPiF * time);
+            double f1Component = amplitude1 * Math.sin(twoPiF1 * time);
+            buffer[sample] = (float) (f0Component + f1Component);
+        }
+
+         int bufferIndex = 0;
+        for (int i = 0; i < byteBuffer.length; i++) {
+            final int x = (int) (buffer[bufferIndex++] * 32767.0);
+            byteBuffer[i] = (byte) x;
+            i++;
+             byteBuffer[i] = (byte) (x >>> 8);
         }
     }
 
     public static void playSound() {
         final AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
                 (int) sampleRate, AudioFormat.CHANNEL_CONFIGURATION_MONO,
-                AudioFormat.ENCODING_PCM_16BIT, numSamples,
+                AudioFormat.ENCODING_PCM_16BIT, byteBuffer.length,
                 AudioTrack.MODE_STATIC);
-        audioTrack.write(generatedSnd, 0, generatedSnd.length);
+        audioTrack.write(byteBuffer, 0, byteBuffer.length);
         audioTrack.play();
 
     }
